@@ -1,10 +1,12 @@
 const USUARIO = 'LeDarko-12';
 const REPO = 'AP005-7';
-const API_BASE = `https://api.github.com/repos/${USUARIO}/${REPO}/contents`;
+const API_REPO = `https://api.github.com/repos/${USUARIO}/${REPO}`;
+const API_BASE = `${API_REPO}/contents`;
 
 document.addEventListener('DOMContentLoaded', () => {
   const contenedor = document.getElementById('contenedor-repo');
   const navCortes = document.getElementById('nav-cortes');
+  const repoUpdatedEl = document.getElementById('repo-updated');
   
   // Referencias del modal
   const modal = document.getElementById('modal-detalle');
@@ -18,6 +20,25 @@ document.addEventListener('DOMContentLoaded', () => {
   modal.addEventListener('click', (e) => {
     if (e.target === modal) modal.close();
   });
+
+  // Obtener fecha de la última actualización (push) del repositorio
+  async function cargarFechaActualizacion() {
+    try {
+      const resp = await fetch(API_REPO);
+      if (!resp.ok) return;
+      const data = await resp.json();
+      if (data.pushed_at) {
+        const fecha = new Date(data.pushed_at).toLocaleDateString('es-CO', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
+        repoUpdatedEl.textContent = `• Actualizado: ${fecha}`;
+      }
+    } catch (error) {
+      // Si falla la consulta de fecha, simplemente se omite sin afectar la página
+    }
+  }
 
   // Función para abrir el modal y listar los archivos reales dentro de una subcarpeta
   async function verArchivosCarpeta(rutaCarpeta) {
@@ -49,12 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Función principal que carga las carpetas del repositorio
   async function cargarRepositorio() {
     try {
-      // 1. Obtener contenido de la raíz del repositorio
       const respuestaRaiz = await fetch(API_BASE);
       if (!respuestaRaiz.ok) throw new Error('Error al conectar con GitHub');
       const itemsRaiz = await respuestaRaiz.json();
 
-      // Filtramos solo las carpetas principales (ej. Corte1, Corte2)
       const carpetasPrincipales = itemsRaiz.filter(item => item.type === 'dir');
 
       if (carpetasPrincipales.length === 0) {
@@ -62,22 +81,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Limpiamos el mensaje de carga
       contenedor.innerHTML = '';
 
-      // 2. Por cada carpeta principal (Corte), obtenemos sus subcarpetas
       for (const corte of carpetasPrincipales) {
-        // Agregar enlace al menú de navegación
         const liNav = document.createElement('li');
         liNav.innerHTML = `<a href="#sec-${corte.name}"><i class='bx bx-folder'></i> ${corte.name}</a>`;
         navCortes.appendChild(liNav);
 
-        // Consultar el contenido interno del corte
         const respSub = await fetch(corte.url);
         const itemsInternos = await respSub.json();
         const subcarpetas = itemsInternos.filter(sub => sub.type === 'dir');
 
-        // Crear la sección del corte
         const section = document.createElement('section');
         section.id = `sec-${corte.name}`;
         section.className = 'section-block';
@@ -117,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
         contenedor.appendChild(section);
       }
 
-      // 3. Asignar eventos a todos los botones de información generados
       document.querySelectorAll('.btn-info').forEach(btn => {
         btn.addEventListener('click', () => {
           verArchivosCarpeta(btn.dataset.ruta);
@@ -133,5 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  cargarFechaActualizacion();
   cargarRepositorio();
 });
