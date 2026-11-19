@@ -60,13 +60,15 @@ main {
 .logo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 1.2rem;
 }
 
-.logo i {
-  font-size: 1.6rem;
-  color: var(--primary);
+.logo-gif {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 
 .main-nav ul {
