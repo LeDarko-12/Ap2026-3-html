@@ -65,10 +65,11 @@ main {
 }
 
 .logo-gif {
-  width: 34px;
-  height: 34px;
+  width: 26px;
+  height: 26px;
   object-fit: contain;
   image-rendering: pixelated;
+  flex-shrink: 0;
 }
 
 .main-nav ul {
@@ -357,6 +358,13 @@ main {
   color: var(--text-muted);
 }
 
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .footer-link {
   color: var(--primary);
   text-decoration: none;
@@ -364,4 +372,9 @@ main {
   display: flex;
   align-items: center;
   gap: 5px;
+}
+
+.repo-updated {
+  font-size: 0.78rem;
+  color: var(--text-muted);
 }
